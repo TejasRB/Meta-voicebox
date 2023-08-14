@@ -1,0 +1,23 @@
+import requests
+from bs4 import BeautifulSoup
+
+url = "https://www.imdb.com/chart/top/"
+headers = {'User-Agent': 'Mozilla/5.0'}
+response = requests.get(url, headers=headers)
+soup = BeautifulSoup(response.content, "html.parser")
+
+movie_links = soup.find_all('a', class_="ipc-title-link-wrapper")
+movie_dates = [date.get_text() for date in soup.find_all('span', class_="sc-14dd939d-6 kHVqMR cli-title-metadata-item") if date.get_text().isdigit()]
+
+for link, date in zip(movie_links[:10], movie_dates):
+    movie_url = "https://www.imdb.com" + link.get("href")
+    movie_response = requests.get(movie_url, headers=headers)
+    movie_soup = BeautifulSoup(movie_response.content, "html.parser")
+    
+    movie_name = movie_soup.find('span', class_="sc-afe43def-1 fDTGTb").get_text()
+    movie_description = movie_soup.find('span', class_="sc-466bb6c-0 kJJttH").get_text()
+
+    print(f"Movie Name: {movie_name}")
+    print(f"Description: {movie_description}")
+    print(f"Year: {date}")
+    print("------------------------------------------")
